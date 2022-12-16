@@ -51,12 +51,13 @@ const loginUser = asynchHandler(async (req, res) => {
   }
 });
 
-// !handle refresh token
+// !Function:   handle refresh token
+// !@Method:    GET
+// !Route:      /api/user/refresh
 const handleRefreshToken = asynchHandler(async (req, res) => {
   const cookie = req.cookies;
   if (!cookie?.refreshToken) throw new Error("No refresh Token");
   const refreshToken = cookie.refreshToken;
-  console.log(refreshToken);
   const user = await User.findOne({ refreshToken });
   if (!user) throw new Error("No refresh token present in db or not matched");
   jwt.verify(refreshToken, process.env.JWT_SECRET, (err, decoded) => {
@@ -66,6 +67,26 @@ const handleRefreshToken = asynchHandler(async (req, res) => {
     const accessToken = generateToken(user?.id);
     res.json({ accessToken });
   });
+});
+
+// !Function:   logout functionality
+// !@Method:    GET
+// !Route:      /api/user/logout
+const logout = asynchHandler(async (req, res) => {
+  const cookie = req.cookies;
+  if (!cookie?.refreshToken) throw new Error("No refresh Token");
+  const refreshToken = cookie.refreshToken;
+  const user = await User.findOne({ refreshToken });
+  if (!user) {
+    res.clearCookie("refreshToken", { httpOnly: true, secure: true });
+    return res.sendStatus(204); // forbidden
+  }
+
+  await User.findOneAndUpdate(refreshToken, {
+    refreshToken: "",
+  });
+  res.clearCookie("refreshToken", { httpOnly: true, secure: true });
+  return res.sendStatus(204); // forbidden
 });
 
 // !@Function:    get all users
@@ -186,4 +207,5 @@ module.exports = {
   blockUser,
   unblockUser,
   handleRefreshToken,
+  logout,
 };
