@@ -6,11 +6,12 @@ const PORT = process.env.PORT || 8000;
 const dbConnect = require("./config/dbConnect");
 const { notFound, errorHandler } = require("./middlewares/errorHandler");
 const authRouter = require("./routes/authRoute");
-const productRouter= require('./routes/productRoute')
+const productRouter = require('./routes/productRoute')
 const cookieParser = require("cookie-parser");
-
+const morgan = require('morgan')
 dbConnect();
 
+app.use(morgan('dev'));
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
