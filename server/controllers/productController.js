@@ -1,6 +1,7 @@
 const Product = require("../models/productModel");
 const asyncHandler = require("express-async-handler");
-const slugify = require('slugify')
+const slugify = require('slugify');
+const { query } = require("express");
 
 // !@Function:   create a new product
 // !@Method:     POST
@@ -24,9 +25,9 @@ const getaProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
     const findProduct = await Product.findById(id);
-    res.json({ findProduct })
+    res.json({ findProduct });
   } catch (error) {
-    throw new Error(error)
+    throw new Error(error);
   }
 })
 
@@ -35,8 +36,24 @@ const getaProduct = asyncHandler(async (req, res) => {
 // !@Route:      api/product
 const getAllProduct = asyncHandler(async (req, res) => {
   try {
-    const getAllProducts = await Product.find();
-    res.json(getAllProducts)
+
+    // Filtering
+    const queryObj = { ...req.query };
+    const excludeFields = ["page", "sort", "limit", "fields"];
+    // removing fields from the query
+    excludeFields.forEach(el => delete queryObj[el]);
+
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    
+    const query= Product.find(JSON.parse(queryStr));
+
+    const product= await query;
+    res.json(product);
+
+
+    const getAllProducts = await Product.find(queryObj);
+    res.json(getAllProducts);
   } catch (error) {
     throw new Error(error);
   }
