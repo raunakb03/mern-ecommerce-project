@@ -2,7 +2,6 @@ const Blog = require("../models/blogModel");
 const User = require("../models/userModel");
 const asynchHandler = require("express-async-handler");
 const validateMongodbId = require("../utils/validateMongodbId");
-const { response } = require("express");
 
 
 // !@Function:    create a blog
@@ -35,8 +34,8 @@ const updateBlog = asynchHandler(async (req, res) => {
 // !@Method:      GET
 // !@Route:       /api/blog/:id
 const getBlog = asynchHandler(async (req, res) => {
-    validateMongodbId(id);
     const { id } = req.params;
+    validateMongodbId(id);
     try {
         const getBlog = await Blog.findById(id);
         let views = getBlog.numViews;
@@ -65,8 +64,8 @@ const getAllBlogs = asynchHandler(async (req, res) => {
 // !@Method:      DELETE
 // !@Route:       /api/blog/:id
 const deleteBlog = asynchHandler(async (req, res) => {
-    validateMongodbId(id);
     const { id } = req.params;
+    validateMongodbId(id);
     try {
         const deleteBlog = await Blog.findByIdAndDelete(id);
         if (!deleteBlog) return res.json({ msg: "Blog does not exists" });
