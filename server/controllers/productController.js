@@ -152,7 +152,6 @@ const rating = asyncHandler(async (req, res) => {
       }, {
         $set: { "ratings.$.star": star },
       }, { new: true });
-      return res.json(updateRating);
     }
     else {
       const rateProduct = await Product.findByIdAndUpdate(prodId, {
@@ -162,13 +161,20 @@ const rating = asyncHandler(async (req, res) => {
             postedBy: _id,
           }
         }
-      }, { new: true })
-      return res.json(rateProduct);
+      }, { new: true });
     }
+    const getAllRatings = await Product.findById(prodId);
+    const totalRating = getAllRatings.ratings.length;
+    let ratingSum = getAllRatings.ratings.map(item => item.star).reduce((prev, curr) => prev + curr, 0);
+    let actualRating = ratingSum / totalRating;
+    actualRating = actualRating.toFixed(1);
+    let finalProduct = await Product.findByIdAndUpdate(prodId, {
+      totalRating: actualRating,
+    }, { new: true });
+    res.json(finalProduct);
   } catch (error) {
     throw new Error(error);
   }
-
 })
 
 module.exports = { createProduct, getaProduct, getAllProduct, updateProduct, deleteProduct, addToWishlist, rating };
